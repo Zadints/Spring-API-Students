@@ -32,11 +32,21 @@ public class SqlitePortafolioRepository {
             Set<Project> projects = new HashSet<>();
 
             while (!result.next()){
-                /*
-                projects.add(new Project(
-                        result.getString("uuid"),
 
-                ));*/
+                projects.add(new Project(
+                        result.getString("project_uuid"),
+                        result.getString("project_name"),
+                        result.getString("project_status"),
+                        result.getString("project_type"),
+                        result.getString("project_problem"),
+                        result.getString("project_solution"),
+                        result.getString("project_result"),
+                        result.getString("project_repository"),
+                        result.getBytes("project_image"),
+                        result.getString("project_created"),
+                        result.getInt("project_commits")
+
+                ));
             }
 
 
@@ -44,5 +54,6 @@ public class SqlitePortafolioRepository {
             throw new RuntimeException(e);
         }
 
+        return Set.of();
     }
 }

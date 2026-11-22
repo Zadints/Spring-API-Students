@@ -9,10 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 
 @Repository
-public class GetGithubRepository {
+public class GithubRepository {
     private final RestClient client;
 
-    public GetGithubRepository(@Qualifier("githubRestClient") RestClient client) {
+    public GithubRepository(@Qualifier("githubRestClient") RestClient client) {
         this.client = client;
     }
 

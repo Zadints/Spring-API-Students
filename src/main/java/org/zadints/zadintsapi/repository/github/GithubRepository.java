@@ -3,7 +3,7 @@ package org.zadints.zadintsapi.repository.github;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClient;
-import org.zadints.zadintsapi.model.dto.GithubRepositoryDto;
+import org.zadints.zadintsapi.dto.project.request.GithubRepositoryDto;
 
 import java.util.Arrays;
 import java.util.List;

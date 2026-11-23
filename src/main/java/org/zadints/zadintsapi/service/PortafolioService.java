@@ -1,13 +1,15 @@
 package org.zadints.zadintsapi.service;
 
 import org.springframework.stereotype.Service;
-import org.zadints.zadintsapi.model.dto.GithubRepositoryDto;
-import org.zadints.zadintsapi.model.entitie.Project;
+import org.zadints.zadintsapi.dto.project.request.GithubRepositoryDto;
+import org.zadints.zadintsapi.dto.project.response.CollaboratorsDetailResponse;
+import org.zadints.zadintsapi.dto.project.response.ProjectDetailResponse;
 import org.zadints.zadintsapi.repository.github.GithubRepository;
 import org.zadints.zadintsapi.repository.sqlite.SqlitePortafolioRepository;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 @Service
 public class PortafolioService {
@@ -21,11 +23,22 @@ public class PortafolioService {
     }
 
 
-    public void reloadRepositories(){
+    public List<ProjectDetailResponse> getRepositories(){
         List<GithubRepositoryDto> repositories = githubRepository.getRepositories();
-        if (repositories.isEmpty()) return;
+        if (repositories.isEmpty()) return new ArrayList<>();
 
-        Set<Project> projects = sqlitePortafolioRepository.getProjects();
+
+        List<ProjectDetailResponse> projects = sqlitePortafolioRepository.getProjects();
+        Map<String, List<String>>  stacks = sqlitePortafolioRepository.getStackProject();
+        Map<String, List<CollaboratorsDetailResponse>> collaborators = sqlitePortafolioRepository.getCollaborator();
+
+
+        for (ProjectDetailResponse p : projects){
+            p.setStack(stacks.get(p.getUuid()));
+            p.setCollaboratorList(collaborators.get(p.getUuid()));
+        }
+
+        return projects;
     }
 
 

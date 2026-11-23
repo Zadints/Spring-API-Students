@@ -1,28 +1,37 @@
 package org.zadints.zadintsapi.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.zadints.zadintsapi.model.entitie.Project;
+import org.springframework.web.bind.annotation.*;
+import org.zadints.zadintsapi.dto.project.response.ProjectDetailResponse;
+import org.zadints.zadintsapi.repository.sqlite.SqlitePortafolioRepository;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/portafolio")
 public class ProtafolioController {
 
-    @GetMapping
-    public String listar() {
-        return "¡Mi primera API REST con Spring Boot!";
+    private final SqlitePortafolioRepository sqlitePortafolioRepository;
+
+    public ProtafolioController(SqlitePortafolioRepository sqlitePortafolioRepository) {
+        this.sqlitePortafolioRepository = sqlitePortafolioRepository;
     }
 
-    @GetMapping("/privada")
+
+    @GetMapping("/projects")
+    public ResponseEntity<List<ProjectDetailResponse>> getProjects() {
+        List<ProjectDetailResponse> value = sqlitePortafolioRepository.getProjects();
+        return ResponseEntity.ok(value);
+    }
+
+    @PutMapping("/projects")
     public String privada() {
         return "Accediste a una ruta protegida";
     }
 
     @GetMapping("/project/{id}")
-    public ResponseEntity<Project> getUser(@PathVariable String id) {
+    public ResponseEntity<ProjectDetailResponse> getUser(@PathVariable String id) {
 
         return userService.findById(id)
                 .map(ResponseEntity::ok)

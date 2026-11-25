@@ -2,14 +2,17 @@ package org.zadints.zadintsapi.service;
 
 import org.springframework.stereotype.Service;
 import org.zadints.zadintsapi.dto.project.request.GithubRepositoryDto;
+import org.zadints.zadintsapi.dto.project.request.project.CreateProjectRequest;
 import org.zadints.zadintsapi.dto.project.response.CollaboratorsDetailResponse;
 import org.zadints.zadintsapi.dto.project.response.ProjectDetailResponse;
+import org.zadints.zadintsapi.exceptions.ProjectNotFoundException;
 import org.zadints.zadintsapi.repository.github.GithubRepository;
 import org.zadints.zadintsapi.repository.sqlite.SqlitePortafolioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 //@ActiveProfiles("test")
@@ -24,7 +27,7 @@ public class PortafolioService {
     }
 
 
-    public List<ProjectDetailResponse> getRepositories(){
+    public List<ProjectDetailResponse> getProjects(){
         List<GithubRepositoryDto> repositories = githubRepository.getRepositories();
         if (repositories.isEmpty()) return new ArrayList<>();
 
@@ -44,9 +47,14 @@ public class PortafolioService {
 
 
     public ProjectDetailResponse getProject(String uuid){
-        ProjectDetailResponse project = sqlitePortafolioRepository.getProject(uuid);
-        project.setStack(stacks.get(p.getUuid()));
-        project.setCollaboratorList(collaborators.get(p.getUuid()));
+        Optional<ProjectDetailResponse> project= sqlitePortafolioRepository.getProject(uuid);
+        if (project.isEmpty()) throw new ProjectNotFoundException("Project " + uuid + " no exist.");
+        return project.get();
+    }
+
+
+    public void createProject(CreateProjectRequest project){
+
     }
 
 }

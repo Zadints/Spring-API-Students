@@ -1,13 +1,14 @@
 package org.zadints.zadintsapi.controller;
 
 import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.zadints.zadintsapi.dto.project.request.CreateProjectRequest;
+import org.zadints.zadintsapi.dto.project.request.project.CreateProjectRequest;
 import org.zadints.zadintsapi.dto.project.response.ProjectDetailResponse;
 import org.zadints.zadintsapi.repository.sqlite.SqlitePortafolioRepository;
+import org.zadints.zadintsapi.service.PortafolioService;
 
 import java.util.List;
 
@@ -15,29 +16,29 @@ import java.util.List;
 @RequestMapping("/portafolio")
 public class ProtafolioController {
 
-    private final SqlitePortafolioRepository sqlitePortafolioRepository;
+    private final PortafolioService portafolioService;
 
-    public ProtafolioController(SqlitePortafolioRepository sqlitePortafolioRepository) {
-        this.sqlitePortafolioRepository = sqlitePortafolioRepository;
+    public ProtafolioController(PortafolioService portafolioService) {
+        this.portafolioService = portafolioService;
     }
 
 
     @GetMapping("/projects")
     public ResponseEntity<List<ProjectDetailResponse>> getProjects() {
-        List<ProjectDetailResponse> value = sqlitePortafolioRepository.getProjects();
+        List<ProjectDetailResponse> value = portafolioService.getProjects();
         return ResponseEntity.ok(value);
     }
 
     @PutMapping("/projects")
-    public String createProjects(@Valid @RequestBody CreateProjectRequest project) {
+    public ResponseEntity<Void> createProjects(@Valid @RequestBody CreateProjectRequest project) {
+       portafolioService.createProject(project);
+       return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/project/{id}")
-    public ResponseEntity<ProjectDetailResponse> getUser(@PathVariable String id) {
+    @GetMapping("/projects/{id}")
+    public ResponseEntity<ProjectDetailResponse> getUser(@PathVariable @UUID String id) {
 
-        return userService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(portafolioService.getProject(id));
     }
 
 }

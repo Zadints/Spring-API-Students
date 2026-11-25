@@ -115,74 +115,90 @@ public class SqlitePortafolioRepository {
     }
 
 
-    public List<ProjectDetailResponse> getProject(String uuid){
-        String sql = "SELECT * FROM projects WHERE project_uuid = ?";
+    public Optional<ProjectDetailResponse> getProject(String uuid){
+        String sql1 = "SELECT * FROM projects WHERE project_uuid = ?";
+        String sql2 = "SELECT * FROM stack WHERE project_uuid = ?";
 
-        try(Connection conn = dataSource.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1,uuid);
+        String sql3 = """
+                SELECT c.collaborator_uuid, c.name, c.link, c.description, c.image
+                FROM collaborator_projects AS p
+                INNER JOIN collaborators AS c
+                    ON p.collaborator_uuid = c.collaborator_uuid
+                WHERE project_uuid = ?
+                """;
 
-            ResultSet result = stmt.executeQuery();
+        try(Connection conn = dataSource.getConnection()) {
 
-            List<ProjectDetailResponse> projects = new ArrayList<>();
+            conn.setAutoCommit(false);
 
-            while (result.next()){
+            try (PreparedStatement stmt1 = conn.prepareStatement(sql1);
+                 PreparedStatement stmt2 = conn.prepareStatement(sql2);
+                 PreparedStatement stmt3 = conn.prepareStatement(sql3)) {
 
-                projects.add(new ProjectDetailResponse(
+                stmt1.setString(1,uuid);
+                stmt2.setString(1,uuid);
+                stmt3.setString(1,uuid);
+
+                ResultSet result1 = stmt1.executeQuery();
+                ResultSet result2 = stmt2.executeQuery();
+                ResultSet result3 = stmt3.executeQuery();
+
+
+                if (!result1.next()) {
+                    conn.commit();
+                    return Optional.empty();
+                }
+
+                var project = new ProjectDetailResponse(
                         uuid,
-                        result.getString("project_name"),
-                        result.getString("project_status"),
-                        result.getString("project_type"),
-                        result.getString("project_problem"),
-                        result.getString("project_solution"),
-                        result.getString("project_result"),
-                        result.getString("project_repository"),
-                        result.getBytes("project_image"),
-                        result.getString("project_create_by"),
-                        result.getString("project_created"),
-                        result.getInt("project_commits")
-                ));
+                        result1.getString("project_name"),
+                        result1.getString("project_status"),
+                        result1.getString("project_type"),
+                        result1.getString("project_problem"),
+                        result1.getString("project_solution"),
+                        result1.getString("project_result"),
+                        result1.getString("project_repository"),
+                        result1.getBytes("project_image"),
+                        result1.getString("project_create_by"),
+                        result1.getString("project_created"),
+                        result1.getInt("project_commits")
+                );
+
+                List<String> stack = new ArrayList<>();
+                while (result2.next()){
+                    stack.add(result2.getString("stack_name"));
+                }
+                List<CollaboratorsDetailResponse> col = new ArrayList<>();
+                while (result3.next()){
+                    col.add(new CollaboratorsDetailResponse(
+                            result3.getString("collaborator_uuid"),
+                            result3.getString("name"),
+                            result3.getString("link"),
+                            result3.getString("description"),
+                            result3.getBytes("image")
+                    ));
+                }
+
+                project.setStack(stack);
+                project.setCollaboratorList(col);
+                conn.commit();
+                return Optional.of(project);
+
+
+            }catch (SQLException | RuntimeException e) {
+
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackException) {
+                    e.addSuppressed(rollbackException);
+                }
+
+                throw e;
             }
 
-            return projects;
-
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-
-    public Optional<ProjectDetailResponse> addProject(String uuid){
-        String sql = "SELECT * FROM projects WHERE project_uuid = ?";
-
-        try(Connection conn = dataSource.getConnection();   
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1,uuid);
-
-            ResultSet result = stmt.executeQuery();
-
-
-            if (!result.next()) return Optional.empty();
-
-            var project = new ProjectDetailResponse(
-                    uuid,
-                    result.getString("project_name"),
-                    result.getString("project_status"),
-                    result.getString("project_type"),
-                    result.getString("project_problem"),
-                    result.getString("project_solution"),
-                    result.getString("project_result"),
-                    result.getString("project_repository"),
-                    result.getBytes("project_image"),
-                    result.getString("project_create_by"),
-                    result.getString("project_created"),
-                    result.getInt("project_commits")
-            );
-
-            return Optional.of(project);
-
-        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

@@ -113,4 +113,78 @@ public class SqlitePortafolioRepository {
             throw new RuntimeException(e);
         }
     }
+
+
+    public List<ProjectDetailResponse> getProject(String uuid){
+        String sql = "SELECT * FROM projects WHERE project_uuid = ?";
+
+        try(Connection conn = dataSource.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1,uuid);
+
+            ResultSet result = stmt.executeQuery();
+
+            List<ProjectDetailResponse> projects = new ArrayList<>();
+
+            while (result.next()){
+
+                projects.add(new ProjectDetailResponse(
+                        uuid,
+                        result.getString("project_name"),
+                        result.getString("project_status"),
+                        result.getString("project_type"),
+                        result.getString("project_problem"),
+                        result.getString("project_solution"),
+                        result.getString("project_result"),
+                        result.getString("project_repository"),
+                        result.getBytes("project_image"),
+                        result.getString("project_create_by"),
+                        result.getString("project_created"),
+                        result.getInt("project_commits")
+                ));
+            }
+
+            return projects;
+
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public Optional<ProjectDetailResponse> addProject(String uuid){
+        String sql = "SELECT * FROM projects WHERE project_uuid = ?";
+
+        try(Connection conn = dataSource.getConnection();   
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1,uuid);
+
+            ResultSet result = stmt.executeQuery();
+
+
+            if (!result.next()) return Optional.empty();
+
+            var project = new ProjectDetailResponse(
+                    uuid,
+                    result.getString("project_name"),
+                    result.getString("project_status"),
+                    result.getString("project_type"),
+                    result.getString("project_problem"),
+                    result.getString("project_solution"),
+                    result.getString("project_result"),
+                    result.getString("project_repository"),
+                    result.getBytes("project_image"),
+                    result.getString("project_create_by"),
+                    result.getString("project_created"),
+                    result.getInt("project_commits")
+            );
+
+            return Optional.of(project);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

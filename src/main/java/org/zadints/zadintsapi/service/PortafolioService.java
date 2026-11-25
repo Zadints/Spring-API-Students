@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+//@ActiveProfiles("test")
 public class PortafolioService {
 
     private final GithubRepository githubRepository;
@@ -41,5 +42,11 @@ public class PortafolioService {
         return projects;
     }
 
+
+    public ProjectDetailResponse getProject(String uuid){
+        ProjectDetailResponse project = sqlitePortafolioRepository.getProject(uuid);
+        project.setStack(stacks.get(p.getUuid()));
+        project.setCollaboratorList(collaborators.get(p.getUuid()));
+    }
 
 }

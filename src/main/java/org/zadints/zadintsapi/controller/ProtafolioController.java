@@ -1,8 +1,11 @@
 package org.zadints.zadintsapi.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.zadints.zadintsapi.dto.project.request.CreateProjectRequest;
 import org.zadints.zadintsapi.dto.project.response.ProjectDetailResponse;
 import org.zadints.zadintsapi.repository.sqlite.SqlitePortafolioRepository;
 
@@ -26,8 +29,7 @@ public class ProtafolioController {
     }
 
     @PutMapping("/projects")
-    public String privada() {
-        return "Accediste a una ruta protegida";
+    public String createProjects(@Valid @RequestBody CreateProjectRequest project) {
     }
 
     @GetMapping("/project/{id}")
@@ -37,4 +39,5 @@ public class ProtafolioController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 }

@@ -1,4 +1,5 @@
 package org.zadints.zadintsapi.config;
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,7 +21,8 @@ public class SecurityConfig {
 
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api").permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/portafolio").permitAll()
                         .requestMatchers("/api/privada").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/users").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -35,10 +37,11 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
+        /*
         config.setAllowedOrigins(
                 List.of("http://localhost:5173")
         );
-
+*/
         config.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "PATCH",
                         "DELETE", "OPTIONS")

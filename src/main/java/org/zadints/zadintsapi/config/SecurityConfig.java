@@ -22,7 +22,7 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers("/portafolio").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/portafolio", "/portafolio/**").permitAll()
                         .requestMatchers("/api/privada").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/users").hasRole("ADMIN")
                         .anyRequest().authenticated()
